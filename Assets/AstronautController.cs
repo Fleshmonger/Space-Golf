@@ -1,14 +1,14 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class CameraController : MonoBehaviour
+public class AstronautController : MonoBehaviour
 {
-    private bool grounded = true, overTheShoulder = true;
+    private bool overTheShoulder = true;
     private Vector3[] cameraPositions;
 
     public bool tilt = false;
-    public float cameraRotateSpeed = 120f, launchSpeed = 20f;
-    public Camera camera;
+    public float cameraRotateSpeed = 120f, launchSpeed = 20f, minSpeed = 0.1f;
+    public Camera view;
     public GameObject pitch;
 
     public void ToggleTilt()
@@ -22,11 +22,11 @@ public class CameraController : MonoBehaviour
         overTheShoulder = !overTheShoulder;
         if (overTheShoulder)
         {
-            camera.transform.localPosition = new Vector3(0f, 2.5f, -5f);
+            view.transform.localPosition = new Vector3(0f, 2.5f, -5f);
         }
         else
         {
-            camera.transform.localPosition = Vector3.zero;
+            view.transform.localPosition = Vector3.zero;
         }
     }
 
@@ -38,6 +38,15 @@ public class CameraController : MonoBehaviour
 
     public void Update()
     {
+        Rigidbody body = GetComponent<Rigidbody>();
+        if (body.velocity.magnitude < minSpeed)
+        {
+            body.velocity = Vector3.zero;
+        }
+        if (Input.GetKey(KeyCode.Escape))
+        {
+            Application.Quit();
+        }
         if (Input.GetKeyDown(KeyCode.O))
         {
             ToggleTilt();
@@ -59,20 +68,20 @@ public class CameraController : MonoBehaviour
                 RotateNoTilt(offset);
             }
         }
-        if (Input.GetMouseButtonDown(1) && grounded)
+        if (Input.GetMouseButtonDown(1) && body.velocity.magnitude == 0f)
         {
             Vector3 direction = pitch.transform.forward;
-            Rigidbody body = GetComponent<Rigidbody>();
             body.velocity = direction.normalized * launchSpeed;
-            grounded = false;
         }
     }
 
     public void OnCollisionEnter(Collision collision)
     {
+        /*
         grounded = true;
         Rigidbody body = GetComponent<Rigidbody>();
         body.velocity = Vector3.zero;
+        */
     }
 
     public Vector2 Center()
